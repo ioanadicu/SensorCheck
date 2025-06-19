@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verificare senzori vs șantiere</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Verificare senzori</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        <label for="addresses">Fișier cu adrese (.txt):</label>
+        <input type="file" name="addresses" required><br><br>
+
+        <label for="sensors">Fișier cu senzori (.csv):</label>
+        <input type="file" name="sensors" required><br><br>
+
+        <button type="submit">Generează raport</button>
+    </form>
+
+    {% if report %}
+        <h2>Senzori mai departe de 0.5 km</h2>
+        <ul>
+            {% for sensor_id, dist in report %}
+                <li>{{ sensor_id }} – {{ dist }} km</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if not_found %}
+        <h2>Adrese negăsite</h2>
+        <ul>
+            {% for address in not_found %}
+                <li>{{ address }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
