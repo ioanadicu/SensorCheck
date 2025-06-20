@@ -71,13 +71,20 @@ def index():
             sensor_coord = (sensor["Latitude"], sensor["Longitude"])
 
             min_dist = float("inf")
-            for _, site_coord in addresses:
+            closest_address = "Adresă necunoscută"
+
+            for site_address, site_coord in addresses:
                 dist = geodesic(sensor_coord, site_coord).km
                 if dist < min_dist:
                     min_dist = dist
+                    closest_address = site_address
 
             if min_dist > 0.5:
-                report.append((sensor_id, round(min_dist, 2)))
+                report.append({
+                    "SensorID": sensor_id,
+                    "Distance": round(min_dist, 2),
+                    "Address": closest_address
+                })
 
     return render_template("index.html", report=report, not_found=not_found)
 

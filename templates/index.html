@@ -29,8 +29,8 @@
     {% if report %}
         <h2>Senzori mai departe de 0.5 km</h2>
         <ul>
-            {% for sensor_id, dist in report %}
-                <li>{{ sensor_id }} – {{ dist }} km</li>
+            {% for entry in report %}
+                <li>{{ entry.SensorID }} – {{ entry.Distance }} km – {{ entry.Address }}</li>
             {% endfor %}
         </ul>
     {% endif %}
@@ -46,7 +46,7 @@
 
     {% if report or not_found %}
         <form method="POST" action="/download">
-            <input type="hidden" name="report" value="{% for id, dist in report %}{{ id }} – {{ dist }} km\n{% endfor %}">
+            <input type="hidden" name="report" value="{% for entry in report %}{{ entry.SensorID }} – {{ entry.Distance }} km – {{ entry.Address }}\n{% endfor %}">
             <input type="hidden" name="not_found" value="{% for addr in not_found %}{{ addr }}\n{% endfor %}">
             <button type="submit">📄 Descarcă raport PDF</button>
         </form>

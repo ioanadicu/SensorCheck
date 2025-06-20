@@ -2,10 +2,14 @@ import requests
 from config import AXIFLEET_API_KEY
 from datetime import datetime, timedelta
 
-def get_sensor_data_from_axifleet():
-    import requests
-    from config import AXIFLEET_API_KEY
+import requests
+from config import AXIFLEET_API_KEY
 
+import requests
+from config import AXIFLEET_API_KEY
+from datetime import datetime
+
+def get_sensor_data_from_axifleet():
     url = "https://online.axifleet.ro/api/history/unread/list"
 
     headers = {
@@ -21,7 +25,7 @@ def get_sensor_data_from_axifleet():
 
     response = requests.post(url, headers=headers, json=body)
 
-    sensors = []
+    sensors = {}
 
     if response.status_code == 200:
         data = response.json()
@@ -29,14 +33,25 @@ def get_sensor_data_from_axifleet():
             location = item.get("location")
             if location and "lat" in location and "lng" in location:
                 label = item.get("extra", {}).get("tracker_label", f"Tracker-{item.get('tracker_id', '???')}")
-                sensors.append({
-                    "SensorID": label,
-                    "Latitude": location["lat"],
-                    "Longitude": location["lng"]
-                })
+                timestamp_str = item.get("time")
+                try:
+                    timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
+                except:
+                    timestamp = datetime.min
+
+                if label not in sensors or timestamp > sensors[label]["timestamp"]:
+                    sensors[label] = {
+                        "SensorID": label,
+                        "Latitude": location["lat"],
+                        "Longitude": location["lng"],
+                        "timestamp": timestamp,
+                        "address": location.get("address", "Adresă necunoscută")
+                    }
     else:
         print(f"Eroare: {response.status_code} – {response.text}")
 
-    print(f"[DEBUG] Am extras {len(sensors)} senzori din API")
-    return sensors
+    print(f"[DEBUG] Am extras {len(sensors)} senzori unici din API (cu locații cele mai recente)")
+    return list(sensors.values())
+
+
 
