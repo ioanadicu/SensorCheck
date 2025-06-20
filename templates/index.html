@@ -9,14 +9,22 @@
     <h1>Verificare senzori</h1>
 
     <form method="POST" enctype="multipart/form-data">
-        <label for="addresses">Fișier cu adrese (.txt):</label>
-        <input type="file" name="addresses" required><br><br>
+        <label for="sensors">Încarcă fișierul cu senzori (CSV):</label>
+        <input type="file" name="sensors"> 
 
-        <label for="sensors">Fișier cu senzori (.csv):</label>
-        <input type="file" name="sensors" required><br><br>
+        <label for="addresses">Încarcă fișierul cu adrese (TXT):</label>
+        <input type="file" name="addresses"><br><br>
 
-        <button type="submit">Generează raport</button>
+        <label>
+            <input type="checkbox" name="use_axifleet">
+            Folosește senzorii din API Axifleet
+        </label>
+        <br><br>
+
+
+        <input type="submit" value="Generează raport">
     </form>
+
 
     {% if report %}
         <h2>Senzori mai departe de 0.5 km</h2>
@@ -35,5 +43,14 @@
             {% endfor %}
         </ul>
     {% endif %}
+
+    {% if report or not_found %}
+        <form method="POST" action="/download">
+            <input type="hidden" name="report" value="{% for id, dist in report %}{{ id }} – {{ dist }} km\n{% endfor %}">
+            <input type="hidden" name="not_found" value="{% for addr in not_found %}{{ addr }}\n{% endfor %}">
+            <button type="submit">📄 Descarcă raport PDF</button>
+        </form>
+    {% endif %}
+
 </body>
 </html>
