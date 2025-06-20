@@ -46,10 +46,11 @@
 
     {% if report or not_found %}
         <form method="POST" action="/download">
-            <input type="hidden" name="report" value="{% for entry in report %}{{ entry.SensorID }} – {{ entry.Distance }} km – {{ entry.Address }}\n{% endfor %}">
-            <input type="hidden" name="not_found" value="{% for addr in not_found %}{{ addr }}\n{% endfor %}">
+            <input type="hidden" name="report" value="{% for entry in report %}{{ entry.SensorID }} – {{ entry.Distance }} km – {{ entry.Address | replace('"', '') | replace('\n', ' ') }}\n{% endfor %}">
+            <input type="hidden" name="not_found" value="{% for addr in not_found %}{{ addr | replace('\n', ' ') }}\n{% endfor %}">
             <button type="submit">📄 Descarcă raport PDF</button>
         </form>
+
     {% endif %}
 
 </body>

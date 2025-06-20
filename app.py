@@ -45,7 +45,9 @@ def index():
                     loc = result[0]["geometry"]["location"]
                     addresses.append((line, (loc["lat"], loc["lng"])))
                 else:
-                    not_found.append(line)
+                    if line not in [addr[0] for addr in addresses]:
+                        not_found.append(line)
+
             except Exception as e:
                 not_found.append(line)
 
@@ -114,25 +116,40 @@ def download_pdf():
         c.drawString(50, y, "Senzori aflați la peste 0.5 km de orice șantier:")
         y -= 20
 
-        for line in report_data.splitlines():
-            if y < 50:
-                c.showPage()
-                c.setFont(font_name, 12)
-                y = height - 50
-            c.drawString(60, y, line.strip())
-            y -= 20
+        def draw_wrapped_lines(canvas_obj, text, font, font_size, max_width, start_x, start_y):
+            canvas_obj.setFont(font, font_size)
+            y = start_y
+            for line in text.splitlines():
+                words = line.strip().split()
+                current_line = ""
+                for word in words:
+                    test_line = current_line + " " + word if current_line else word
+                    if canvas_obj.stringWidth(test_line, font, font_size) < max_width:
+                        current_line = test_line
+                    else:
+                        if y < 50:
+                            canvas_obj.showPage()
+                            canvas_obj.setFont(font, font_size)
+                            y = A4[1] - 50
+                        canvas_obj.drawString(start_x, y, current_line)
+                        y -= 20
+                        current_line = word
+                if current_line:
+                    if y < 50:
+                        canvas_obj.showPage()
+                        canvas_obj.setFont(font, font_size)
+                        y = A4[1] - 50
+                    canvas_obj.drawString(start_x, y, current_line)
+                    y -= 20
+            return y
+
+        y = draw_wrapped_lines(c, report_data, font_name, 12, width - 100, 60, y - 10)
 
         y -= 20
         c.drawString(50, y, "Adrese negăsite (erori geocodare):")
         y -= 20
 
-        for line in not_found_data.splitlines():
-            if y < 50:
-                c.showPage()
-                c.setFont(font_name, 12)
-                y = height - 50
-            c.drawString(60, y, line.strip())
-            y -= 20
+        y = draw_wrapped_lines(c, not_found_data, font_name, 12, width - 100, 60, y)
 
         c.save()
         return send_file(tmp.name, as_attachment=True, download_name="raport_senzori.pdf")
